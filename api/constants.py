@@ -1,0 +1,1 @@
+WORLDS_FOLDER = "./worlds"
