@@ -7,8 +7,7 @@ from .helper_functions import *
 
 @socketio.on("connect", namespace="/dm")
 def dm_connect():
-    auth = request.headers.get("Authorization")
-    password = auth.split(" ")[1] if auth else None
+    password = request.headers.get("Authorization")
     if password != app.config["DM_PASSWORD"]:
         disconnect()
     else:
@@ -20,8 +19,20 @@ def display_connect():
     emit("connected", namespace="/display")
 
 
+@socketio.on("disconnect", namespace="/dm")
+def dm_disconnect():
+    pass
+
+
+@socketio.on("disconnect", namespace="/display")
+def display_disconnect():
+    pass
+
+
 @socketio.on("change_world", namespace="/dm")
 def change_world(world_id: str):
+    if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
+        disconnect()
     app.config["WORLD"] = world_id
     world = loadWorld()
     region_id = world["current_region"]
@@ -32,6 +43,8 @@ def change_world(world_id: str):
 
 @socketio.on("change_region", namespace="/dm")
 def change_region(region_id: str):
+    if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
+        disconnect()
     world = loadWorld()
     world["current_region"] = region_id
     updateWorld(world)
@@ -41,6 +54,8 @@ def change_region(region_id: str):
 
 @socketio.on("update_region", namespace="/dm")
 def update_region(region: Region):
+    if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
+        disconnect()
     updateRegion(region)
     region_id = region["id"]
     world = loadWorld()
@@ -50,6 +65,8 @@ def update_region(region: Region):
 
 @socketio.on("update_creature", namespace="/dm")
 def update_creature(creature: Creature):
+    if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
+        disconnect()
     updateCreature(creature)
     region_id = creature["current_region"]
     world = loadWorld()

@@ -23,7 +23,7 @@ def getWorldPath() -> pathlib.Path:
 
 def loadWorld() -> World:
     world_data = yaml.safe_load((getWorldPath() / "world.yaml").read_text())
-    return World(current_region=world_data["current_region"])
+    return World(**world_data)
 
 
 def updateWorld(data: World) -> None:
@@ -31,10 +31,10 @@ def updateWorld(data: World) -> None:
 
 
 def loadFullRegion(region: str) -> Region:
-    region_path = getWorldPath() / "regions" / region
-    if not region_path.exists() and region_path.is_dir():
+    region_path = (getWorldPath() / "regions" / region).with_suffix(".yaml")
+    if not region_path.exists() and region_path.is_file():
         raise FileNotFoundError(f"Region folder not found: {region_path}")
-    region_data = yaml.safe_load((region_path / "region.yml").read_text())
+    region_data = yaml.safe_load(region_path.read_text())
     return Region(**region_data)
 
 
@@ -93,7 +93,7 @@ def loadSpecies(species: str) -> Species:
     species_path = (getWorldPath() / "species" / species).with_suffix(".yaml")
     if not species_path.exists():
         raise FileNotFoundError(f"Species folder not found: {species_path}")
-    species_data = yaml.safe_load((species_path / "species.yml").read_text())
+    species_data = yaml.safe_load(species_path.read_text())
     return Species(**species_data)
 
 
