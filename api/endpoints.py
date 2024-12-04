@@ -1,3 +1,6 @@
+import os
+
+import flask
 from flask import request
 from flask_socketio import disconnect, emit
 
@@ -47,6 +50,8 @@ def display_disconnect():
 def change_world(world_id: str):
     if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
         disconnect()
+    if os.sep in world_id or "/" in world_id:
+        return "Invalid world id", 400
     app.config["WORLD"] = world_id
     world = loadWorld()
     region_id = world["current_region"]
@@ -60,6 +65,8 @@ def change_world(world_id: str):
 def change_region(region_id: str):
     if app.config["WORLD"] is None:
         return "No world selected", 400
+    if os.sep in region_id or "/" in region_id:
+        return "Invalid region id", 400
     if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
         disconnect()
     world = loadWorld()
@@ -99,4 +106,9 @@ def update_creature(creature: Creature):
 def send_image(path):
     if app.config["WORLD"] is None:
         return "No world selected", 400
-    return app.send_static_file(pathlib.Path(app.config["WORLD"]) / "images" / path)
+    imgs_path = getWorldPath() / "images"
+    full_path = (imgs_path / path).resolve()
+
+    if not imgs_path in full_path.parents:
+        return "Invalid path", 400
+    return flask.send_file(full_path)
