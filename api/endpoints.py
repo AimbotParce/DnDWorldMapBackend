@@ -22,7 +22,7 @@ def dm_connect():
         emit("update_display_counter", connected_displays, to=request.sid)
         emit("update_worlds", loadWorlds(), to=request.sid)
         if app.config["WORLD"] is not None:
-            emit("change_world", loadWorld(), to=request.sid)
+            emit("change_world", loadWorld()["id"], to=request.sid)
             emit("update_regions", loadAllRegions(), to=request.sid)
             emit("update_creatures", loadAllCreatures(), to=request.sid)
 
@@ -37,7 +37,7 @@ def display_connect():
     if app.config["WORLD"] is not None:
         world = loadWorld()
         region_id = world["current_region"]
-        emit("change_world", world, to=request.sid)
+        emit("change_world", world["name"], to=request.sid)
         emit("change_region", loadVisibleRegion(region_id), to=request.sid)
         emit("update_creatures", loadVisibleCreatures(region_id), to=request.sid)
 
@@ -63,8 +63,11 @@ def change_world(world_id: str):
     app.config["WORLD"] = world_id
     world = loadWorld()
     region_id = world["current_region"]
-    emit("change_world", world, namespace="/dm", broadcast=True)
-    emit("change_world", loadVisibleWorld(), namespace="/display", broadcast=True)
+    emit("change_world", world["id"], namespace="/dm", broadcast=True)
+    emit("update_worlds", loadWorlds(), namespace="/dm", broadcast=True)
+    emit("update_regions", loadAllRegions(), namespace="/dm", broadcast=True)
+    emit("update_creatures", loadAllCreatures(), namespace="/dm", broadcast=True)
+    emit("change_world", loadVisibleWorld()["name"], namespace="/display", broadcast=True)
     emit("change_region", loadVisibleRegion(region_id), namespace="/display", broadcast=True)
     emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
 
@@ -80,8 +83,10 @@ def change_region(region_id: str):
     world = loadWorld()
     world["current_region"] = region_id
     updateWorld(world)
+    emit("update_worlds", loadWorlds(), namespace="/dm", broadcast=True)
     emit("change_region", loadVisibleRegion(region_id), namespace="/display", broadcast=True)
     emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
+    emit("update_worlds", loadWorlds(), namespace="/dm", broadcast=True)
 
 
 @socketio.on("update_region", namespace="/dm")
@@ -95,6 +100,7 @@ def update_region(region: Region):
     world = loadWorld()
     if world["current_region"] == region_id:
         emit("update_region", loadVisibleRegion(region_id), namespace="/display", broadcast=True)
+    emit("update_regions", loadAllRegions(), namespace="/dm", broadcast=True)
 
 
 @socketio.on("update_creature", namespace="/dm")
@@ -108,6 +114,7 @@ def update_creature(creature: Creature):
     world = loadWorld()
     if world["current_region"] == region_id:
         emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
+    emit("update_creatures", loadAllCreatures(), namespace="/dm", broadcast=True)
 
 
 @app.get("/images/<path:path>")
