@@ -4,6 +4,8 @@ from flask_socketio import disconnect, emit
 from .app import app, socketio
 from .helper_functions import *
 
+connected_displays = 0
+
 
 @socketio.on("connect", namespace="/dm")
 def dm_connect():
@@ -12,10 +14,14 @@ def dm_connect():
         disconnect()
     else:
         emit("connected", {"message": "Admin Connected"}, to=request.sid)
+        emit("update_display_counter", connected_displays, to=request.sid)
 
 
 @socketio.on("connect", namespace="/display")
 def display_connect():
+    global connected_displays
+    connected_displays += 1
+    emit("update_display_counter", connected_displays, namespace="/dm", broadcast=True)
     emit("connected", {"message": "Display Connected"}, to=request.sid)
     if app.config["WORLD"] is not None:
         world = loadWorld()
@@ -32,7 +38,9 @@ def dm_disconnect():
 
 @socketio.on("disconnect", namespace="/display")
 def display_disconnect():
-    pass
+    global connected_displays
+    connected_displays -= 1
+    emit("update_display_counter", connected_displays, namespace="/dm", broadcast=True)
 
 
 @socketio.on("change_world", namespace="/dm")
@@ -42,7 +50,8 @@ def change_world(world_id: str):
     app.config["WORLD"] = world_id
     world = loadWorld()
     region_id = world["current_region"]
-    emit("change_world", world, broadcast=True)
+    emit("change_world", world, namespace="/dm", broadcast=True)
+    emit("change_world", loadVisibleWorld(), namespace="/display", broadcast=True)
     emit("change_region", loadVisibleRegion(region_id), namespace="/display", broadcast=True)
     emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
 

@@ -26,6 +26,11 @@ def loadWorld() -> World:
     return World(**world_data)
 
 
+def loadVisibleWorld() -> VisibleWorld:
+    world = loadWorld()
+    return VisibleWorld(name=world["name"])
+
+
 def updateWorld(data: World) -> None:
     (getWorldPath() / "world.yaml").write_text(yaml.dump(data))
 
