@@ -20,6 +20,11 @@ def dm_connect():
         print("Admin connected", flush=True)
         emit("connected", {"message": "Admin Connected"}, to=request.sid)
         emit("update_display_counter", connected_displays, to=request.sid)
+        emit("update_worlds", loadWorlds(), to=request.sid)
+        if app.config["WORLD"] is not None:
+            emit("change_world", loadVisibleWorld(), to=request.sid)
+            emit("update_regions", loadAllRegions(), to=request.sid)
+            emit("update_creatures", loadAllCreatures(), to=request.sid)
 
 
 @socketio.on("connect", namespace="/display")

@@ -21,6 +21,17 @@ def getWorldPath() -> pathlib.Path:
     return res
 
 
+def loadWorlds() -> list[World]:
+    worlds: list[World] = []
+    for world_folder in pathlib.Path(WORLDS_FOLDER).iterdir():
+        world_file = world_folder / "world.yaml"
+        if not world_file.exists() and world_file.is_file():
+            continue
+        world_data = yaml.safe_load(world_file.read_text())
+        worlds.append(World(**world_data))
+    return worlds
+
+
 def loadWorld() -> World:
     world_data = yaml.safe_load((getWorldPath() / "world.yaml").read_text())
     return World(**world_data)
@@ -33,6 +44,18 @@ def loadVisibleWorld() -> VisibleWorld:
 
 def updateWorld(data: World) -> None:
     (getWorldPath() / "world.yaml").write_text(yaml.dump(data))
+
+
+def loadAllRegions() -> list[Region]:
+    regions_path = getWorldPath() / "regions"
+    if not regions_path.exists() and regions_path.is_dir():
+        raise FileNotFoundError(f"Regions folder not found: {regions_path}")
+    regions = []
+    for region_file in regions_path.glob("*.yaml"):
+        region_data = yaml.safe_load(region_file.read_text())
+        regions.append(Region(**region_data))
+
+    return regions
 
 
 def loadFullRegion(region: str) -> Region:
@@ -86,10 +109,22 @@ def loadCreatures(region: str) -> list[Creature]:
     if not creatures_path.exists():
         raise FileNotFoundError(f"Creatures folder not found: {creatures_path}")
     creatures = []
-    for creature_file in creatures_path.iterdir():
+    for creature_file in creatures_path.glob("*.yaml"):
         creature_data = Creature(**yaml.safe_load(creature_file.read_text()))
         if creature_data["current_region"] == region:
             creatures.append(creature_data)
+
+    return creatures
+
+
+def loadAllCreatures() -> list[Creature]:
+    creatures_path = getWorldPath() / "creatures"
+    if not creatures_path.exists():
+        raise FileNotFoundError(f"Creatures folder not found: {creatures_path}")
+    creatures = []
+    for creature_file in creatures_path.glob("*.yaml"):
+        creature_data = Creature(**yaml.safe_load(creature_file.read_text()))
+        creatures.append(creature_data)
 
     return creatures
 
