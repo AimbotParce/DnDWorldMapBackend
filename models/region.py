@@ -12,6 +12,7 @@ class RegionImage(TypedDict):
     path: str
     top_left_corner: Point2D
     width: int
+    height: int
 
 
 class RegionState(TypedDict):
