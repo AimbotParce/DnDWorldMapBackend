@@ -26,6 +26,7 @@ def dm_connect():
 def display_connect():
     global connected_displays
     connected_displays += 1
+    print(f"Display connected, total: {connected_displays}", flush=True)
     emit("update_display_counter", connected_displays, namespace="/dm", broadcast=True)
     emit("connected", {"message": "Display Connected"}, to=request.sid)
     if app.config["WORLD"] is not None:
