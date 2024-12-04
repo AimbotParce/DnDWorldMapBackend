@@ -103,7 +103,7 @@ def update_creature(creature: Creature):
 
 
 @app.get("/images/<path:path>")
-def send_image(path):
+def send_image(path: str):
     if app.config["WORLD"] is None:
         return "No world selected", 400
     imgs_path = getWorldPath() / "images"
