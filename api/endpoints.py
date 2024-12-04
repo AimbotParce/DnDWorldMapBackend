@@ -14,8 +14,10 @@ connected_displays = 0
 def dm_connect():
     password = request.headers.get("Authorization")
     if password != app.config["DM_PASSWORD"]:
-        raise ConnectionRefusedError("Invalid password")
+        print(f"Admin attempted to connect with incorrect password", flush=True)
+        disconnect()
     else:
+        print("Admin connected", flush=True)
         emit("connected", {"message": "Admin Connected"}, to=request.sid)
         emit("update_display_counter", connected_displays, to=request.sid)
 
