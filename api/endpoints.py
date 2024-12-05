@@ -24,6 +24,7 @@ def dm_connect():
         if app.config["WORLD"] is not None:
             emit("change_world", loadWorld()["id"], to=request.sid)
             emit("update_regions", loadAllRegions(), to=request.sid)
+            emit("update_species", loadAllSpecies(), namespace="/dm", broadcast=True)
             emit("update_creatures", loadAllCreatures(), to=request.sid)
 
 
@@ -67,6 +68,7 @@ def change_world(world_id: str):
     emit("update_worlds", loadWorlds(), namespace="/dm", broadcast=True)
     emit("update_regions", loadAllRegions(), namespace="/dm", broadcast=True)
     emit("update_creatures", loadAllCreatures(), namespace="/dm", broadcast=True)
+    emit("update_species", loadAllSpecies(), namespace="/dm", broadcast=True)
     emit("change_world", loadVisibleWorld()["name"], namespace="/display", broadcast=True)
     emit("change_region", loadVisibleRegion(region_id), namespace="/display", broadcast=True)
     emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)

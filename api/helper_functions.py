@@ -137,6 +137,18 @@ def loadSpecies(species: str) -> Species:
     return Species(**species_data)
 
 
+def loadAllSpecies() -> list[Species]:
+    species_path = getWorldPath() / "species"
+    if not species_path.exists():
+        raise FileNotFoundError(f"Species folder not found: {species_path}")
+    species = []
+    for species_file in species_path.glob("*.yaml"):
+        species_data = Species(**yaml.safe_load(species_file.read_text()))
+        species.append(species_data)
+
+    return species
+
+
 def loadVisibleCreatures(region: str) -> list[VisibleCreature]:
     creatures = loadCreatures(region)
     visible_creatures: list[VisibleCreature] = []
