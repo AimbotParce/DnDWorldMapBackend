@@ -113,9 +113,7 @@ def update_creature(creature: Creature):
         disconnect()
     updateCreature(creature)
     region_id = creature["current_region"]
-    world = loadWorld()
-    if world["current_region"] == region_id:
-        emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
+    emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
     emit("update_creatures", loadAllCreatures(), namespace="/dm", broadcast=True)
 
 
