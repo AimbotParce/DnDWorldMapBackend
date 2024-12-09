@@ -2,6 +2,7 @@ import pathlib
 
 import yaml
 from shapely.geometry import Polygon
+from shapely.ops import polygonize
 
 from models import *
 from models._basic import Point2D
@@ -70,10 +71,12 @@ def loadVisibleRegion(region_name: str) -> VisibleRegion:
     region = loadFullRegion(region_name)
     img_data = region["states"][region["current_state"]]["image"]
     if region["visible"]:
+        fog_of_war = Polygon()
+    else:
         top_left = img_data["top_left_corner"]
         width = img_data["width"]
         height = img_data["height"]
-        visible_polygon = Polygon(
+        fog_of_war = Polygon(
             [
                 tuple(top_left),
                 (top_left[0] + width, top_left[1]),
@@ -81,22 +84,19 @@ def loadVisibleRegion(region_name: str) -> VisibleRegion:
                 (top_left[0], top_left[1] + height),
             ]
         )
-    else:
-        visible_polygon = Polygon()
 
     for subregion in region["subregions"]:
         region_polygon = Polygon(subregion["polygon"])
         if subregion["visible"]:
-            visible_polygon = visible_polygon.union(region_polygon)
+            fog_of_war = fog_of_war.difference(region_polygon)
         else:
-            visible_polygon = visible_polygon.difference(region_polygon)
+            fog_of_war = fog_of_war.union(region_polygon)
 
-    return VisibleRegion(
-        name=region["name"],
-        grid=region["grid"],
-        image=img_data,
-        visible_polygon=visible_polygon.exterior.coords[:-1],  # TO DO: This isn't a single polygon!
-    )
+    # Break the fog of war into a list of simple polygons
+    simple_polygons = list(polygonize(fog_of_war))
+    fog_of_war = list(p.exterior.coords[:-1] for p in simple_polygons)
+
+    return VisibleRegion(name=region["name"], grid=region["grid"], image=img_data, fog_of_war=fog_of_war)
 
 
 def updateRegion(region: Region) -> None:

@@ -39,4 +39,4 @@ class VisibleRegion(TypedDict):
     name: str
     grid: None | Grid
     image: RegionImage
-    visible_polygon: list[list[Point2D]]
+    fog_of_war: list[list[Point2D]]
