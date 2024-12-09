@@ -1,8 +1,11 @@
 import pathlib
 
+import matplotlib.pyplot as plt
 import yaml
+from shapely import LineString, MultiLineString, union_all
 from shapely.geometry import Polygon
 from shapely.ops import polygonize
+from shapely.plotting import plot_polygon
 
 from models import *
 from models._basic import Point2D
@@ -92,11 +95,15 @@ def loadVisibleRegion(region_name: str) -> VisibleRegion:
         else:
             fog_of_war = fog_of_war.union(region_polygon)
 
-    # Break the fog of war into a list of simple polygons
-    simple_polygons = list(polygonize(fog_of_war))
-    fog_of_war = list(p.exterior.coords[:-1] for p in simple_polygons)
+    for hole in fog_of_war.interiors:
+        # Add a small incision from the centroid of the hole to the exterior
+        centroid = hole.centroid
+        incision = LineString([centroid, (centroid.coords[0][0], 9999999999)]).buffer(0.0001)
+        fog_of_war = fog_of_war.difference(incision)
 
-    return VisibleRegion(name=region["name"], grid=region["grid"], image=img_data, fog_of_war=fog_of_war)
+    fog_of_war = fog_of_war.exterior.coords[:-1]
+
+    return VisibleRegion(name=region["name"], grid=region["grid"], image=img_data, fog_of_war=[fog_of_war])
 
 
 def updateRegion(region: Region) -> None:
