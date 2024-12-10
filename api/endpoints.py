@@ -112,8 +112,8 @@ def update_creature(creature: Creature):
     if not request.headers.get("Authorization") == app.config["DM_PASSWORD"]:
         disconnect()
     updateCreature(creature)
-    region_id = creature["current_region"]
-    emit("update_creatures", loadVisibleCreatures(region_id), namespace="/display", broadcast=True)
+    current_region = loadWorld()["current_region"]
+    emit("update_creatures", loadVisibleCreatures(current_region), namespace="/display", broadcast=True)
     emit("update_creatures", loadAllCreatures(), namespace="/dm", broadcast=True)
 
 
