@@ -1,11 +1,8 @@
 import pathlib
 
-import matplotlib.pyplot as plt
 import yaml
-from shapely import LineString, MultiLineString, union_all
+from shapely import LineString
 from shapely.geometry import Polygon
-from shapely.ops import polygonize
-from shapely.plotting import plot_polygon
 
 from models import *
 from models._basic import Point2D
