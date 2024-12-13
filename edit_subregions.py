@@ -66,6 +66,8 @@ if __name__ == "__main__":
             self.scatters: list[plt.PathCollection] = [None] * len(subregions)
             self.fills: list[plt.Polygon] = [None] * len(subregions)
 
+            self.draw_all()
+
             # Connect mouse events
             self.cid_click = self.fig.canvas.mpl_connect("button_press_event", self.on_click)
             self.cid_release = self.fig.canvas.mpl_connect("button_release_event", self.on_release)
