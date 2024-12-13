@@ -1,8 +1,10 @@
 import pathlib
 
 import yaml
-from shapely import LineString
+from matplotlib import pyplot as plt
+from shapely import LineString, MultiPolygon
 from shapely.geometry import Polygon
+from shapely.plotting import plot_polygon
 
 from models import *
 from models._basic import Point2D
@@ -71,12 +73,12 @@ def loadVisibleRegion(region_name: str) -> VisibleRegion:
     region = loadFullRegion(region_name)
     img_data = region["states"][region["current_state"]]["image"]
     if region["visible"]:
-        fog_of_war = Polygon()
+        fog_of_war = list(s["polygon"] for s in region["subregions"] if not s["visible"])
     else:
         top_left = img_data["top_left_corner"]
         width = img_data["width"]
         height = img_data["height"]
-        fog_of_war = Polygon(
+        fog_poly = Polygon(
             [
                 tuple(top_left),
                 (top_left[0] + width, top_left[1]),
@@ -85,22 +87,26 @@ def loadVisibleRegion(region_name: str) -> VisibleRegion:
             ]
         )
 
-    for subregion in region["subregions"]:
-        region_polygon = Polygon(subregion["polygon"])
-        if subregion["visible"]:
-            fog_of_war = fog_of_war.difference(region_polygon)
-        else:
-            fog_of_war = fog_of_war.union(region_polygon)
+        for subregion in region["subregions"]:
+            region_polygon = Polygon(subregion["polygon"])
+            if subregion["visible"]:
+                fog_poly = fog_poly.difference(region_polygon)
+            else:
+                fog_poly = fog_poly.union(region_polygon)
 
-    for hole in fog_of_war.interiors:
-        # Add a small incision from the centroid of the hole to the exterior
-        centroid = hole.centroid
-        incision = LineString([centroid, (centroid.coords[0][0], 9999999999)]).buffer(0.0001)
-        fog_of_war = fog_of_war.difference(incision)
+        if not isinstance(fog_poly, MultiPolygon):
+            fog_poly = MultiPolygon([fog_poly])
 
-    fog_of_war = fog_of_war.exterior.coords[:-1]
+        fog_of_war = []
+        for poly in fog_poly.geoms:
+            for hole in poly.interiors:
+                # Add a small incision from the centroid of the hole to the exterior
+                centroid = hole.centroid
+                incision = LineString([centroid, (centroid.coords[0][0], 9999999999)]).buffer(0.0001)
+                poly = poly.difference(incision)
+            fog_of_war.append(poly.exterior.coords[:-1])
 
-    return VisibleRegion(name=region["name"], grid=region["grid"], image=img_data, fog_of_war=[fog_of_war])
+    return VisibleRegion(name=region["name"], grid=region["grid"], image=img_data, fog_of_war=fog_of_war)
 
 
 def updateRegion(region: Region) -> None:
