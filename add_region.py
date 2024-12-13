@@ -209,7 +209,7 @@ if __name__ == "__main__":
         height = plot.image_data.shape[0] / 100
         if plot.bottom_right_corner is not None:
             width = plot.bottom_right_corner[0] - plot.top_left_corner[0]
-            height = plot.top_left_corner[1] - plot.bottom_right_corner[1]
+            height = plot.bottom_right_corner[1] - plot.top_left_corner[1]
         default_state_image["top_left_corner"] = list(map(float, plot.top_left_corner))
         default_state_image["width"] = float(width)
         default_state_image["height"] = float(height)
