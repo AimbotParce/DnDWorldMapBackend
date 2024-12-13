@@ -218,6 +218,10 @@ if __name__ == "__main__":
 
     region["states"]["default"] = {"image": default_state_image}
 
+    # Copy the image to the world folder
+    new_image_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.imsave(new_image_path, plot.image_data)
+    print(f"Image saved at {new_image_path}")
     # Save the region
     region_path = WORLDS_FOLDER / WORLD / "regions" / f"{region['id']}.yaml"
     region_path.write_text(yaml.dump(region))
