@@ -24,9 +24,9 @@ def getWorldPath() -> pathlib.Path:
 
 def loadWorlds() -> list[World]:
     worlds: list[World] = []
-    for world_folder in pathlib.Path(WORLDS_FOLDER).iterdir():
+    for world_folder in pathlib.Path(WORLDS_FOLDER).glob("*"):
         world_file = world_folder / "world.yaml"
-        if not world_file.exists() and world_file.is_file():
+        if not (world_file.exists() and world_file.is_file()):
             continue
         world_data = yaml.safe_load(world_file.read_text())
         worlds.append(World(**world_data))

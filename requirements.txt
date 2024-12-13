@@ -3,3 +3,4 @@ pyyaml
 flask_socketio
 shapely
 flask_cors
+matplotlib
