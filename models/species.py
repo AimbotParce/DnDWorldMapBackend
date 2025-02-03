@@ -1,13 +1,13 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 
-class SpeciesState(TypedDict):
+class SpeciesState(BaseModel):
     image: str
     width: int
     height: int
 
 
-class Species(TypedDict):
+class Species(BaseModel):
     name: str
     id: str
     states: dict[str, SpeciesState]

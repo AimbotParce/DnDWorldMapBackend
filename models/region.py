@@ -1,31 +1,31 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 from ._basic import Point2D
 
 
-class Grid(TypedDict):
+class Grid(BaseModel):
     type: str
     size: int
 
 
-class RegionImage(TypedDict):
+class RegionImage(BaseModel):
     path: str
     top_left_corner: Point2D
     width: int
     height: int
 
 
-class RegionState(TypedDict):
+class RegionState(BaseModel):
     image: RegionImage
 
 
-class Subregion(TypedDict):
+class Subregion(BaseModel):
     region: str
     polygon: list[Point2D]
     visible: bool
 
 
-class Region(TypedDict):
+class Region(BaseModel):
     name: str
     id: str
     grid: None | Grid
@@ -35,7 +35,7 @@ class Region(TypedDict):
     subregions: list[Subregion]
 
 
-class VisibleRegion(TypedDict):
+class VisibleRegion(BaseModel):
     name: str
     grid: None | Grid
     image: RegionImage

@@ -1,9 +1,9 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 from ._basic import Point2D
 
 
-class Creature(TypedDict):
+class Creature(BaseModel):
     name: str
     id: str
     species: str
@@ -13,7 +13,7 @@ class Creature(TypedDict):
     position: Point2D
 
 
-class VisibleCreature(TypedDict):
+class VisibleCreature(BaseModel):
     name: str
     position: Point2D
     image: str

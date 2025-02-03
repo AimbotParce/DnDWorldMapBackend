@@ -1,11 +1,11 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 
-class World(TypedDict):
+class World(BaseModel):
     id: str
     name: str
     current_region: str
 
 
-class VisibleWorld(TypedDict):
+class VisibleWorld(BaseModel):
     name: str

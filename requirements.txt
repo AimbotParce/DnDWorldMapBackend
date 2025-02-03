@@ -4,3 +4,4 @@ flask_socketio
 shapely
 flask_cors
 matplotlib
+pydantic
